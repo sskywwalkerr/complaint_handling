@@ -6,19 +6,26 @@ from datetime import datetime, timedelta
 
 from app.models import Complaint
 from app.schemas import ComplaintResponse, OpenComplaint
-from app.services.external_api import analyze_sentiment, categorize_complaint
+from app.services.external_api import analyze_sentiment, categorize_complaint, get_location_by_ip
 
 
 async def create_complaint(db: AsyncSession, complaint_data: dict) -> ComplaintResponse:
+    ip = complaint_data.get("ip", "")  # Получаем IP из данных
     sentiment_task = analyze_sentiment(complaint_data["text"])
     category_task = categorize_complaint(complaint_data["text"])
+    location_task = get_location_by_ip(ip)
 
-    sentiment, category = await asyncio.gather(sentiment_task, category_task)
+    sentiment, category, location = await asyncio.gather(
+        sentiment_task,
+        category_task,
+        location_task
+    )
 
     db_complaint = Complaint(
         text=complaint_data["text"],
         sentiment=sentiment,
-        category=category
+        category=category,
+        location=location or {}  # Сохраняем полный JSON-ответ от IP API
     )
     db.add(db_complaint)
     await db.commit()
@@ -29,6 +36,7 @@ async def create_complaint(db: AsyncSession, complaint_data: dict) -> ComplaintR
         status=db_complaint.status,
         sentiment=db_complaint.sentiment,
         category=db_complaint.category,
+        location=db_complaint.location
     )
 
 
