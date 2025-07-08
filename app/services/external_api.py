@@ -44,7 +44,6 @@ async def query_mistral(payload: dict) -> dict:
 
 
 async def categorize_complaint(text: str) -> str:
-    """Категоризация жалобы с использованием Mistral-7B"""
     prompt = f"""
     ### Задача:
     Определи категорию жалобы из следующих вариантов: техническая, оплата, другое.
@@ -71,10 +70,8 @@ async def categorize_complaint(text: str) -> str:
 
         response = await query_mistral(payload)
 
-        # Извлекаем сгенерированный текст
         generated_text = response[0]['generated_text'].strip().lower()
 
-        # Парсим ответ (берем первое подходящее слово)
         for category in ["техническая", "оплата"]:
             if category in generated_text:
                 return category
@@ -87,3 +84,21 @@ async def categorize_complaint(text: str) -> str:
         logger.error(f"Mistral request failed: {str(e)}")
         return "другое"
 
+
+async def get_location_by_ip(query: str) -> dict:
+    """Получение информации о местоположении по IP"""
+    try:
+        # Пропускаем локальные и приватные IP
+        if query in ("127.0.0.1", "::1") or query.startswith(("10.", "192.168.", "172.")):
+            return {}
+
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(
+                f"http://ip-api.com/json/{query}",
+                params={"fields": "country,regionName,city,lat,lon,isp"}
+            )
+            response.raise_for_status()
+            return response.json()
+    except Exception as e:
+        logger.error(f"IP location lookup failed: {str(e)}")
+        return {}
