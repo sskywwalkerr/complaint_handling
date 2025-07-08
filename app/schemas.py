@@ -13,6 +13,7 @@ class ComplaintResponse(BaseModel):
     status: str
     sentiment: str
     category: str
+    location: Optional[Dict] = None
 
 
 class OpenComplaint(BaseModel):
@@ -21,3 +22,5 @@ class OpenComplaint(BaseModel):
     category: str
     sentiment: str
     timestamp: datetime
+
+
