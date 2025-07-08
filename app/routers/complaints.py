@@ -7,6 +7,7 @@ from app.services import complaint_service
 
 router = APIRouter()
 
+
 @router.post("/", response_model=ComplaintResponse)
 async def create_complaint(
     complaint: ComplaintCreate,
@@ -14,12 +15,14 @@ async def create_complaint(
 ):
     return await complaint_service.create_complaint(db, {"text": complaint.text})
 
+
 @router.get("/open/", response_model=list[OpenComplaint])
 async def get_open_complaints(
     hours: int = 1,
     db: AsyncSession = Depends(get_db)
 ):
     return await complaint_service.get_open_complaints(db, hours)
+
 
 @router.patch("/{complaint_id}/close/")
 async def close_complaint(
