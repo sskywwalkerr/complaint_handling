@@ -15,3 +15,4 @@ class Complaint(Base):
     timestamp = Column(DateTime, default=datetime.utcnow)
     sentiment = Column(String(20), default="unknown")
     category = Column(String(50), default="другое")
+    location = Column(JSON, nullable=True)
