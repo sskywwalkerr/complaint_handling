@@ -9,7 +9,7 @@ HEADERS = {"Authorization": f"Bearer {Config.HUGGINGFACE_API_KEY}"}
 
 
 async def analyze_sentiment(text: str) -> str:
-    """Анализ тональности с использованием локальной модели"""
+    """Анализ тональности"""
     try:
         if not hasattr(analyze_sentiment, "model"):
             analyze_sentiment.model = pipeline(
@@ -32,7 +32,7 @@ async def analyze_sentiment(text: str) -> str:
 
 
 async def query_mistral(payload: dict) -> dict:
-    """Запрос к Mistral-7B через Hugging Face API"""
+    """Запрос через Hugging Face API"""
     async with httpx.AsyncClient(timeout=120.0) as client:
         response = await client.post(
             HF_API_URL,
